@@ -1,0 +1,651 @@
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+
+export const LANGUAGES = [
+  { code: "uz", label: "UZ", flag: "🇺🇿" },
+  { code: "ru", label: "RU", flag: "🇷🇺" },
+  { code: "en", label: "EN", flag: "🇬🇧" },
+];
+
+const STORAGE_KEY = "yagona.landing.lang";
+
+const translations = {
+  uz: {
+    navProduct: "Mahsulot",
+    navPlatform: "Platforma",
+    navFeatures: "Imkoniyatlar",
+    navSteps: "Ulanish",
+    navPlans: "Tariflar",
+    navContact: "Aloqa",
+    loginCabinet: "Kabinetga kirish",
+    connectCenter: "Markazni ulash",
+    menu: "Menyu",
+
+    heroKicker: "Bilim markazlari uchun yagona platforma",
+    heroTitle: "Markaz, jamoa va o‘quvchilar uchun",
+    heroTitleEm: "yagona tizim",
+    heroLead:
+      "Yagona o‘quv markazini mijoz sifatida ulaydi. Xodimlar vebda CRM, jadval, davomat va to‘lovlarni oladi, o‘quvchilar esa dars va to‘lovlari bilan mobil ilovani ishlatadi.",
+    requestDemo: "Demo so‘rash",
+    howItWorks: "Qanday ishlaydi",
+    statCrm: "CRM",
+    statCrmHint: "markaz lidlari voronkasi",
+    statWeb: "Veb-kabinet",
+    statWebHint: "xodimlar va egasi",
+    statApp: "Ilova",
+    statAppHint: "o‘quvchi kabineti",
+    logoAlt: "Yagona logotipi",
+
+    previewBar: "yagona · markaz kabineti",
+    previewToday: "Bugun",
+    previewHeadline: "Markaz jadval emas — tizim bo‘lib ishlaydi",
+    previewLicense: "litsenziya faol",
+    previewLeads: "Lidlar",
+    previewLeadsHint: "+12 haftada",
+    previewStudents: "O‘quvchilar",
+    previewStudentsHint: "18 guruh",
+    previewPayments: "To‘lovlar",
+    previewPaymentsHint: "o‘z vaqtida",
+    previewAttendance: "Davomat",
+    previewAttendanceHint: "shu oy",
+    previewNavOverview: "Umumiy",
+    previewNavLeads: "Lidlar",
+    previewNavStudents: "Talabalar",
+    previewNavStudy: "O‘qish",
+    previewNavSchedule: "Jadval",
+    previewNavBilling: "To‘lovlar",
+    previewRow1: "Matematika · A guruh",
+    previewRow1Status: "davom etmoqda",
+    previewRow2: "Ingliz tili · B1",
+    previewRow2Status: "tez orada",
+    previewRow3: "IT Kids",
+    previewRow3Status: "kutilmoqda",
+
+    productKicker: "Kim uchun",
+    productTitle:
+      "O‘quv markazi CRM va ilovani sotib oladi. Yagona uni mijoz sifatida ulaydi.",
+    productText:
+      "Turli markazlar ma’lumotlari aralashmaydi. Xodimlar vebda, o‘quvchilar ilovada ishlaydi.",
+    role1Title: "Markaz egasi",
+    role1Text:
+      "Lidlar voronkasi, o‘quvchilar, jadval va to‘lovlar bitta kabinetda. Jamoani ulaydi, litsenziya va raqamlarni kuzatadi.",
+    role2Title: "O‘qituvchi",
+    role2Text:
+      "Bugungi darslar, o‘z guruhlari va davomat belgilash — ortiqcha ekranlarsiz. Fan bo‘yicha uy vazifasi materiallarini qo‘shadi.",
+    role3Title: "O‘quvchi",
+    role3Text:
+      "Telefon raqami bilan kiradi, jadval, abonement holati va to‘lovlarni ko‘radi. Fan bo‘yicha uy vazifalarini ilovada bajaradi.",
+
+    platformKicker: "Platformaning uch qismi",
+    platformTitle: "Markaz bazasi, veb-kabinet va mobil ilova",
+    platformText:
+      "Bitta platforma: xodimlar uchun kabinet, o‘quvchilar uchun ilova va hammasi bog‘langan ishonchli yadro.",
+    stack1Tag: "MARKAZ",
+    stack1Title: "Yagona markaz bazasi",
+    stack1Text:
+      "Markazning barcha ma’lumotlari — bitta ishonchli joyda. Xodimlar va o‘quvchilar uchun bitta kirish.",
+    stack1Item1: "CRM, o‘quvchilar, jadval, davomat, to‘lovlar",
+    stack1Item2: "Har bir markaz ma’lumotlari alohida saqlanadi",
+    stack1Item3: "Tariflar va litsenziyalar nazorat ostida",
+    stack1Item4: "Xavfsiz kirish va ma’lumot himoyasi",
+    stack2Tag: "WEB",
+    stack2Title: "Veb-kabinet",
+    stack2Text:
+      "Markaz xodimlarining ish joyi: birinchi liddan dars to‘lovigacha.",
+    stack2Item1: "Kunlik ko‘rinish: lidlar, o‘quvchilar, to‘lovlar, darslar",
+    stack2Item2: "Lidlar: bosqichlar, o‘quvchiga aylantirish",
+    stack2Item3: "O‘qish: kurslar, guruhlar, auditoriyalar",
+    stack2Item4: "Rollar: egasi, admin, o‘qituvchi, buxgalter",
+    stack2Item5: "Fan bo‘yicha uy vazifasi materiallarini qo‘shish",
+    stack3Tag: "APP",
+    stack3Title: "Mobil ilova",
+    stack3Text:
+      "O‘quvchi kabineti Yagona uslubida — doimo qo‘lda.",
+    stack3Item1: "Telefon raqami bilan kirish",
+    stack3Item2: "Jadval va abonement holati",
+    stack3Item3: "To‘lovlar tarixi",
+    stack3Item4: "O‘zbek, rus va ingliz tillari",
+    stack3Item5: "Fan bo‘yicha uy vazifalarini bajarish",
+
+    featuresKicker: "Imkoniyatlar",
+    featuresTitle: "Birinchi liddan dars to‘lovigacha",
+    feature1Title: "CRM va lidlar",
+    feature1Text: "Bosqichlar voronkasi, manbalar, lidni bir tugma bilan o‘quvchiga aylantirish.",
+    feature2Title: "O‘quvchilar",
+    feature2Text: "Markazdagi o‘quvchi kartasi: guruhlar, abonementlar, akkaunt bog‘lanishi.",
+    feature3Title: "Jadval",
+    feature3Text: "Kurslar, guruhlar, auditoriyalar va kunlik darslar — chat va Excel o‘rniga.",
+    feature4Title: "Davomat",
+    feature4Text: "Darsda belgilash: kim muntazam keladi, kim chiqib ketayotganini ko‘rasiz.",
+    feature5Title: "To‘lovlar",
+    feature5Text: "Markaz ichidagi dars to‘lovlari va o‘quvchi abonementlari nazorati.",
+    feature6Title: "Bir nechta filial",
+    feature6Text: "Bitta platformada ko‘p markaz — ma’lumotlar hech qachon aralashmaydi.",
+    feature7Title: "Uy vazifalari",
+    feature7Text:
+      "Markaz o‘z materiallarini qo‘shadi: matn, fayl yoki topshiriq. O‘quvchi fan bo‘yicha ko‘radi va ilovada bajaradi.",
+
+    stepsKicker: "Qanday ulaymiz",
+    stepsTitle: "Ishchi kabinetgacha uch qadam",
+    step1Title: "Markazni ulaymiz",
+    step1Text: "Markaz kabineti, egasi va CRM + ilova litsenziyasini yaratamiz.",
+    step2Title: "Ishni sozlaymiz",
+    step2Text: "Xodimlar va rollar, kurslar, guruhlar, lidlar voronkasi va jadval.",
+    step3Title: "O‘quvchilarga ochamiz",
+    step3Text: "Har bir o‘quvchiga ilovaga kirish. Markaz hammasi vebda ko‘radi.",
+
+    plansKicker: "Tariflar",
+    plansTitle: "Qayerdan boshlashni tanlang",
+    plansText: "Narxlarni alohida kelishamiz — saytda mahsulot yo‘nalishlari.",
+    planTrial: "Sinov",
+    planTrialPrice: "14 kun",
+    planTrialNote: "bepul",
+    planTrialItem1: "Markaz CRM",
+    planTrialItem2: "Xodimlar kabineti",
+    planTrialItem3: "O‘quvchi ilovasi",
+    planTrialCta: "Sinab ko‘rish",
+    planBusiness: "Biznes",
+    planBusinessPrice: "CRM + ilova",
+    planBusinessNote: "to‘liq to‘plam",
+    planBusinessItem1: "Markazning barcha modullari",
+    planBusinessItem2: "Jamoa va rollar",
+    planBusinessItem3: "O‘quvchi mobil kabineti",
+    planBusinessItem4: "Ustuvor qo‘llab-quvvatlash",
+    planBusinessCta: "Ulash",
+    planStart: "Start",
+    planStartPrice: "Asosiy to‘plam",
+    planStartNote: "kichik markazlar uchun",
+    planStartItem1: "Lidlar va o‘quvchilar",
+    planStartItem2: "Jadval",
+    planStartItem3: "Dars to‘lovlari",
+    planStartCta: "Shartlarni bilish",
+    planBadge: "O‘sish uchun",
+
+    contactKicker: "Aloqa",
+    contactTitle: "O‘quv markazingizni Yagonaga ulaymiz",
+    contactText: "Ariza qoldiring — xodimlar kabineti va o‘quvchi ilovasini ko‘rsatamiz. Yoki yozing:",
+    formName: "Ism",
+    formNamePh: "Qanday murojaat qilaylik",
+    formCenter: "O‘quv markazi",
+    formCenterPh: "Markaz nomi",
+    formContact: "Telefon yoki email",
+    formContactPh: "+998 … yoki email",
+    formSubmit: "Ariza yuborish",
+    formError: "Ism, markaz va kontaktni to‘ldiring.",
+    formOk: "Xat ochilmoqda. Agar ochilmasa — hello@yagona.app ga yozing",
+    mailSubject: "Yagona arizasi",
+    mailName: "Ism",
+    mailCenter: "Markaz",
+    mailContact: "Kontakt",
+
+    footerOrg: "«YAGONA» MChJ",
+    footerSupport: "Qo‘llab-quvvatlash xizmati",
+    footerCabinet: "Shaxsiy kabinet",
+    footerWebCabinet: "Markaz veb-kabineti",
+    footerStudentApp: "O‘quvchi ilovasi",
+    footerFeatures: "Imkoniyatlar",
+    footerPlans: "Tariflar",
+    footerFaq: "Savol-javob",
+    footerForCenters: "O‘quv markazlariga",
+    footerConnect: "Markazni ulash",
+    footerDemo: "Demo so‘rash",
+    footerHow: "Qanday ulaymiz",
+    footerHelp: "Yordam",
+    footerCompany: "Kompaniya",
+    footerAbout: "Platforma haqida",
+    footerContactUs: "Biz bilan bog‘lanish",
+    footerPrivacy: "Maxfiylik siyosati",
+    footerOffer: "Ommaviy oferta",
+    footerSocial: "Ijtimoiy tarmoqlarda",
+    footerAppYagona: "Yagona ilovasi",
+    footerGooglePlay: "Soon",
+    footerAppStore: "Soon",
+    footerCopy: "© 2022–{year} «YAGONA» MChJ. Barcha huquqlar himoyalangan.",
+    footerPayments: "To‘lov usullari:",
+  },
+
+  ru: {
+    navProduct: "Продукт",
+    navPlatform: "Платформа",
+    navFeatures: "Возможности",
+    navSteps: "Подключение",
+    navPlans: "Тарифы",
+    navContact: "Контакт",
+    loginCabinet: "Войти в кабинет",
+    connectCenter: "Подключить центр",
+    menu: "Меню",
+
+    heroKicker: "Единая платформа для учебных центров",
+    heroTitle: "Единая система для центра,",
+    heroTitleEm: "команды и учеников",
+    heroLead:
+      "Yagona подключает учебный центр как клиента. Сотрудники получают CRM, расписание, посещаемость и оплаты в вебе, а ученики — мобильное приложение с уроками и оплатами.",
+    requestDemo: "Запросить демо",
+    howItWorks: "Как это устроено",
+    statCrm: "CRM",
+    statCrmHint: "воронка лидов центра",
+    statWeb: "Веб-кабинет",
+    statWebHint: "сотрудники и владелец",
+    statApp: "Приложение",
+    statAppHint: "кабинет ученика",
+    logoAlt: "Логотип Yagona",
+
+    previewBar: "yagona · кабинет центра",
+    previewToday: "Сегодня",
+    previewHeadline: "Центр работает как система, а не как таблица",
+    previewLicense: "лицензия активна",
+    previewLeads: "Лиды",
+    previewLeadsHint: "+12 за неделю",
+    previewStudents: "Ученики",
+    previewStudentsHint: "18 групп",
+    previewPayments: "Оплаты",
+    previewPaymentsHint: "вовремя",
+    previewAttendance: "Посещаемость",
+    previewAttendanceHint: "этот месяц",
+    previewNavOverview: "Обзор",
+    previewNavLeads: "Лиды",
+    previewNavStudents: "Студенты",
+    previewNavStudy: "Учёба",
+    previewNavSchedule: "Расписание",
+    previewNavBilling: "Оплаты",
+    previewRow1: "Математика · Группа А",
+    previewRow1Status: "идёт",
+    previewRow2: "Английский · B1",
+    previewRow2Status: "скоро",
+    previewRow3: "IT Kids",
+    previewRow3Status: "ожидает",
+
+    productKicker: "Для кого",
+    productTitle:
+      "Учебный центр покупает CRM и приложение. Yagona подключает его как клиента.",
+    productText:
+      "Данные разных центров не смешиваются. Сотрудники работают в вебе, ученики — в приложении.",
+    role1Title: "Владелец центра",
+    role1Text:
+      "Воронка лидов, ученики, расписание и оплаты в одном кабинете. Подключает команду, следит за лицензией и цифрами центра.",
+    role2Title: "Преподаватель",
+    role2Text:
+      "Сегодняшние уроки, свои группы и отметка посещаемости — без лишних экранов. Добавляет материалы домашних заданий по предмету.",
+    role3Title: "Ученик",
+    role3Text:
+      "Входит по телефону, видит расписание, абонемент и оплаты. Выполняет домашние задания в приложении — по каждому предмету отдельно.",
+
+    platformKicker: "Три части платформы",
+    platformTitle: "База центра, веб-кабинет и мобильное приложение",
+    platformText:
+      "Одна платформа: кабинет для сотрудников, приложение для учеников и надёжное ядро, которое всё связывает.",
+    stack1Tag: "ЦЕНТР",
+    stack1Title: "Единая база центра",
+    stack1Text:
+      "Все данные центра — в одном надёжном хранилище. Один вход для сотрудников и учеников.",
+    stack1Item1: "CRM, ученики, расписание, посещаемость, оплаты",
+    stack1Item2: "Данные каждого центра надёжно изолированы",
+    stack1Item3: "Тарифы и лицензии под контролем",
+    stack1Item4: "Безопасный вход и защита данных",
+    stack2Tag: "ВЕБ",
+    stack2Title: "Веб-кабинет",
+    stack2Text:
+      "Рабочее место сотрудников центра: от первого лида до оплаты занятия.",
+    stack2Item1: "Обзор дня: лиды, ученики, оплаты, уроки",
+    stack2Item2: "Лиды: стадии, конверсия в ученика",
+    stack2Item3: "Учёба: курсы, группы, аудитории",
+    stack2Item4: "Роли: владелец, админ, преподаватель, бухгалтер",
+    stack2Item5: "Свои материалы домашних заданий по предмету",
+    stack3Tag: "APP",
+    stack3Title: "Мобильное приложение",
+    stack3Text:
+      "Личный кабинет ученика в фирменном стиле Yagona — всегда под рукой.",
+    stack3Item1: "Вход по номеру телефона",
+    stack3Item2: "Расписание и статус абонемента",
+    stack3Item3: "История оплат занятий",
+    stack3Item4: "Узбекский, русский и английский язык",
+    stack3Item5: "Домашние задания по предметам в приложении",
+    featuresTitle: "От первого лида до оплаты занятия",
+    feature1Title: "CRM и лиды",
+    feature1Text: "Воронка стадий, источники, конверсия лида в ученика одной кнопкой.",
+    feature2Title: "Ученики",
+    feature2Text: "Карточка ученика в центре: группы, абонементы, привязка к аккаунту.",
+    feature3Title: "Расписание",
+    feature3Text: "Курсы, группы, аудитории и уроки на день — вместо чатов и Excel.",
+    feature4Title: "Посещаемость",
+    feature4Text: "Отметка прямо на занятии: видно, кто ходит стабильно, а кто выпадает.",
+    feature5Title: "Оплаты",
+    feature5Text: "Оплаты занятий внутри центра и контроль абонементов учеников.",
+    feature6Title: "Несколько филиалов",
+    feature6Text: "Много центров на одной платформе — данные никогда не пересекаются.",
+    feature7Title: "Домашние задания",
+    feature7Text:
+      "Центр добавляет свои материалы: текст, файл или задание. Ученик видит их по предмету и выполняет в приложении.",
+
+    stepsKicker: "Как подключаем",
+    stepsTitle: "Три шага до рабочего кабинета",
+    step1Title: "Подключаем центр",
+    step1Text: "Создаём кабинет центра, владельца и лицензию CRM + приложение.",
+    step2Title: "Настраиваем работу",
+    step2Text: "Сотрудники и роли, курсы, группы, воронка лидов и расписание.",
+    step3Title: "Открываем ученикам",
+    step3Text: "Каждому ученику — вход в приложение. Центр видит всё в вебе.",
+
+    plansKicker: "Тарифы",
+    plansTitle: "Выберите, с чего начать",
+    plansText: "Цены уточняем индивидуально — на лендинге ориентиры продукта.",
+    planTrial: "Пробный",
+    planTrialPrice: "14 дней",
+    planTrialNote: "бесплатно",
+    planTrialItem1: "CRM центра",
+    planTrialItem2: "Кабинет сотрудников",
+    planTrialItem3: "Приложение ученика",
+    planTrialCta: "Попробовать",
+    planBusiness: "Бизнес",
+    planBusinessPrice: "CRM + приложение",
+    planBusinessNote: "полный набор",
+    planBusinessItem1: "Все модули центра",
+    planBusinessItem2: "Команда и роли",
+    planBusinessItem3: "Мобильный кабинет ученика",
+    planBusinessItem4: "Приоритетная поддержка",
+    planBusinessCta: "Подключить",
+    planStart: "Старт",
+    planStartPrice: "Базовый набор",
+    planStartNote: "для небольших центров",
+    planStartItem1: "Лиды и ученики",
+    planStartItem2: "Расписание",
+    planStartItem3: "Оплаты занятий",
+    planStartCta: "Узнать условия",
+    planBadge: "Для роста",
+
+    contactKicker: "Связаться",
+    contactTitle: "Подключим ваш учебный центр к Yagona",
+    contactText: "Оставьте заявку — покажем кабинет сотрудников и приложение ученика. Или напишите на",
+    formName: "Имя",
+    formNamePh: "Как к вам обращаться",
+    formCenter: "Учебный центр",
+    formCenterPh: "Название центра",
+    formContact: "Телефон или email",
+    formContactPh: "+998 … или email",
+    formSubmit: "Отправить заявку",
+    formError: "Заполните имя, центр и контакт.",
+    formOk: "Открываем письмо. Если почта не открылась — напишите на hello@yagona.app",
+    mailSubject: "Заявка Yagona",
+    mailName: "Имя",
+    mailCenter: "Центр",
+    mailContact: "Контакт",
+
+    footerOrg: "ООО «YAGONA»",
+    footerSupport: "Служба поддержки",
+    footerCabinet: "Личный кабинет",
+    footerWebCabinet: "Веб-кабинет центра",
+    footerStudentApp: "Приложение ученика",
+    footerFeatures: "Возможности",
+    footerPlans: "Тарифы",
+    footerFaq: "Вопросы и ответы",
+    footerForCenters: "Учебным центрам",
+    footerConnect: "Подключить центр",
+    footerDemo: "Запросить демо",
+    footerHow: "Как подключаем",
+    footerHelp: "Помощь",
+    footerCompany: "Компания",
+    footerAbout: "О платформе",
+    footerContactUs: "Связаться с нами",
+    footerPrivacy: "Политика конфиденциальности",
+    footerOffer: "Публичная оферта",
+    footerSocial: "Мы в социальных сетях",
+    footerAppYagona: "Приложение Yagona",
+    footerGooglePlay: "Soon",
+    footerAppStore: "Soon",
+    footerCopy: "© 2022–{year} ООО «YAGONA». Все права защищены.",
+    footerPayments: "Методы оплаты:",
+  },
+
+  en: {
+    navProduct: "Product",
+    navPlatform: "Platform",
+    navFeatures: "Features",
+    navSteps: "Onboarding",
+    navPlans: "Pricing",
+    navContact: "Contact",
+    loginCabinet: "Sign in",
+    connectCenter: "Connect a center",
+    menu: "Menu",
+
+    heroKicker: "One platform for learning centers",
+    heroTitle: "One system for the center,",
+    heroTitleEm: "team and students",
+    heroLead:
+      "Yagona connects a learning center as a client. Staff get CRM, schedule, attendance and billing on the web. Students get a mobile app with lessons and payments.",
+    requestDemo: "Request a demo",
+    howItWorks: "How it works",
+    statCrm: "CRM",
+    statCrmHint: "center lead pipeline",
+    statWeb: "Web cabinet",
+    statWebHint: "staff and owner",
+    statApp: "App",
+    statAppHint: "student cabinet",
+    logoAlt: "Yagona logo",
+
+    previewBar: "yagona · center cabinet",
+    previewToday: "Today",
+    previewHeadline: "The center runs as a system, not a spreadsheet",
+    previewLicense: "license active",
+    previewLeads: "Leads",
+    previewLeadsHint: "+12 this week",
+    previewStudents: "Students",
+    previewStudentsHint: "18 groups",
+    previewPayments: "Payments",
+    previewPaymentsHint: "on time",
+    previewAttendance: "Attendance",
+    previewAttendanceHint: "this month",
+    previewNavOverview: "Overview",
+    previewNavLeads: "Leads",
+    previewNavStudents: "Students",
+    previewNavStudy: "Academics",
+    previewNavSchedule: "Schedule",
+    previewNavBilling: "Billing",
+    previewRow1: "Math · Group A",
+    previewRow1Status: "live",
+    previewRow2: "English · B1",
+    previewRow2Status: "soon",
+    previewRow3: "IT Kids",
+    previewRow3Status: "waiting",
+
+    productKicker: "Who it’s for",
+    productTitle:
+      "A learning center buys CRM and the app. Yagona connects it as a client.",
+    productText:
+      "Data from different centers never mixes. Staff work on the web, students in the app.",
+    role1Title: "Center owner",
+    role1Text:
+      "Lead pipeline, students, schedule and payments in one cabinet. Connects the team and tracks license and numbers.",
+    role2Title: "Teacher",
+    role2Text:
+      "Today’s lessons, own groups and attendance — without extra screens. Adds homework materials by subject.",
+    role3Title: "Student",
+    role3Text:
+      "Signs in with a phone number and sees schedule, subscription and payments. Completes homework in the app — by subject.",
+
+    platformKicker: "Three parts of the platform",
+    platformTitle: "Center core, web cabinet and mobile app",
+    platformText:
+      "One platform: a cabinet for staff, an app for students, and a reliable core that connects everything.",
+    stack1Tag: "CORE",
+    stack1Title: "Unified center core",
+    stack1Text:
+      "All center data in one reliable place. One sign-in for staff and students.",
+    stack1Item1: "CRM, students, schedule, attendance, payments",
+    stack1Item2: "Each center’s data stays isolated",
+    stack1Item3: "Plans and licenses under control",
+    stack1Item4: "Secure sign-in and data protection",
+    stack2Tag: "WEB",
+    stack2Title: "Web cabinet",
+    stack2Text:
+      "A workplace for center staff: from the first lead to lesson payment.",
+    stack2Item1: "Day overview: leads, students, payments, lessons",
+    stack2Item2: "Leads: stages, convert to student",
+    stack2Item3: "Academics: courses, groups, rooms",
+    stack2Item4: "Roles: owner, admin, teacher, accountant",
+    stack2Item5: "Custom homework materials by subject",
+    stack3Tag: "APP",
+    stack3Title: "Mobile app",
+    stack3Text:
+      "Student cabinet in Yagona brand style — always at hand.",
+    stack3Item1: "Sign in with phone number",
+    stack3Item2: "Schedule and subscription status",
+    stack3Item3: "Payment history",
+    stack3Item4: "Uzbek, Russian and English",
+    stack3Item5: "Homework by subject in the app",
+    featuresTitle: "From the first lead to lesson payment",
+    feature1Title: "CRM & leads",
+    feature1Text: "Stage pipeline, sources, convert a lead to a student in one click.",
+    feature2Title: "Students",
+    feature2Text: "Student card in the center: groups, subscriptions, account link.",
+    feature3Title: "Schedule",
+    feature3Text: "Courses, groups, rooms and daily lessons — instead of chats and Excel.",
+    feature4Title: "Attendance",
+    feature4Text: "Mark in class: see who comes regularly and who is dropping off.",
+    feature5Title: "Payments",
+    feature5Text: "Lesson payments inside the center and subscription control.",
+    feature6Title: "Multiple branches",
+    feature6Text: "Many centers on one platform — data never crosses.",
+    feature7Title: "Homework",
+    feature7Text:
+      "The center adds its own materials: text, file or task. Students see them by subject and complete them in the app.",
+
+    stepsKicker: "How we connect",
+    stepsTitle: "Three steps to a working cabinet",
+    step1Title: "Connect the center",
+    step1Text: "We create the center cabinet, owner and CRM + app license.",
+    step2Title: "Set up the work",
+    step2Text: "Staff and roles, courses, groups, lead pipeline and schedule.",
+    step3Title: "Open for students",
+    step3Text: "Every student gets app access. The center sees everything on the web.",
+
+    plansKicker: "Pricing",
+    plansTitle: "Choose where to start",
+    plansText: "We confirm pricing individually — here are the product directions.",
+    planTrial: "Trial",
+    planTrialPrice: "14 days",
+    planTrialNote: "free",
+    planTrialItem1: "Center CRM",
+    planTrialItem2: "Staff cabinet",
+    planTrialItem3: "Student app",
+    planTrialCta: "Try it",
+    planBusiness: "Business",
+    planBusinessPrice: "CRM + app",
+    planBusinessNote: "full set",
+    planBusinessItem1: "All center modules",
+    planBusinessItem2: "Team and roles",
+    planBusinessItem3: "Student mobile cabinet",
+    planBusinessItem4: "Priority support",
+    planBusinessCta: "Connect",
+    planStart: "Start",
+    planStartPrice: "Base set",
+    planStartNote: "for smaller centers",
+    planStartItem1: "Leads and students",
+    planStartItem2: "Schedule",
+    planStartItem3: "Lesson payments",
+    planStartCta: "See terms",
+    planBadge: "For growth",
+
+    contactKicker: "Contact",
+    contactTitle: "We’ll connect your learning center to Yagona",
+    contactText: "Leave a request — we’ll show the staff cabinet and student app. Or write to",
+    formName: "Name",
+    formNamePh: "How should we address you",
+    formCenter: "Learning center",
+    formCenterPh: "Center name",
+    formContact: "Phone or email",
+    formContactPh: "+998 … or email",
+    formSubmit: "Send request",
+    formError: "Fill in name, center and contact.",
+    formOk: "Opening email. If it doesn’t open — write to hello@yagona.app",
+    mailSubject: "Yagona request",
+    mailName: "Name",
+    mailCenter: "Center",
+    mailContact: "Contact",
+
+    footerOrg: "YAGONA LLC",
+    footerSupport: "Support service",
+    footerCabinet: "Personal cabinet",
+    footerWebCabinet: "Center web cabinet",
+    footerStudentApp: "Student app",
+    footerFeatures: "Features",
+    footerPlans: "Pricing",
+    footerFaq: "FAQ",
+    footerForCenters: "For learning centers",
+    footerConnect: "Connect a center",
+    footerDemo: "Request a demo",
+    footerHow: "How we connect",
+    footerHelp: "Help",
+    footerCompany: "Company",
+    footerAbout: "About the platform",
+    footerContactUs: "Contact us",
+    footerPrivacy: "Privacy policy",
+    footerOffer: "Public offer",
+    footerSocial: "We are on social media",
+    footerAppYagona: "Yagona app",
+    footerGooglePlay: "Soon",
+    footerAppStore: "Soon",
+    footerCopy: "© 2022–{year} YAGONA LLC. All rights reserved.",
+    footerPayments: "Payment methods:",
+  },
+};
+
+const LanguageContext = createContext(null);
+
+function detectLanguage() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved && translations[saved]) return saved;
+  } catch {
+    /* ignore */
+  }
+  const nav = (navigator.language || "").toLowerCase();
+  if (nav.startsWith("uz")) return "uz";
+  if (nav.startsWith("en")) return "en";
+  return "ru";
+}
+
+export function LanguageProvider({ children }) {
+  const [language, setLanguageState] = useState(detectLanguage);
+
+  useEffect(() => {
+    document.documentElement.lang = language;
+    try {
+      localStorage.setItem(STORAGE_KEY, language);
+    } catch {
+      /* ignore */
+    }
+  }, [language]);
+
+  const setLanguage = useCallback((code) => {
+    if (!translations[code]) return;
+    setLanguageState(code);
+  }, []);
+
+  const t = useCallback(
+    (key, vars) => {
+      const pack = translations[language] || translations.ru;
+      let text = pack[key] || translations.ru[key] || key;
+      if (vars) {
+        text = text.replace(/\{(\w+)\}/g, (_, name) =>
+          vars[name] == null ? "" : String(vars[name]),
+        );
+      }
+      return text;
+    },
+    [language],
+  );
+
+  const value = useMemo(
+    () => ({ language, setLanguage, t }),
+    [language, setLanguage, t],
+  );
+
+  return (
+    <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>
+  );
+}
+
+export function useLanguage() {
+  const ctx = useContext(LanguageContext);
+  if (!ctx) throw new Error("useLanguage must be used within LanguageProvider");
+  return ctx;
+}
